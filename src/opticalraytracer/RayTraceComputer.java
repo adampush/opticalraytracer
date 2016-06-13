@@ -30,12 +30,13 @@ import java.util.Collections;
 
 final public class RayTraceComputer {
 
-	OpticalRayTracer parent;
-	ProgramValues programValues;
+	OpticalRayTracer parent;			// parent OpticalRayTracer object
+	ProgramValues programValues;	// get this from parent OpticalRayTracer opject
 	ArrayList<LineData> lineList;
 	int testCount = 0;
-	Vector[] arrowLines;
+	Vector[] arrowLines;					// array of Vectors for drawing arrowheads
 
+  /* Constructor */
 	public RayTraceComputer(OpticalRayTracer p) {
 		parent = p;
 		programValues = p.programValues;
@@ -45,6 +46,8 @@ final public class RayTraceComputer {
 
 	}
 
+	/* Draw all lenses. Loop through a list of optical componenents and call their
+	drawLens functions */
 	void drawLenses(Graphics2D g) {
 		for (OpticalComponent oc : parent.componentList) {
 			oc.drawLens(g);
@@ -181,6 +184,13 @@ final public class RayTraceComputer {
 		drawScaledLine(x, p2.y, i, g, true);
 	}
 
+	/* TODO: figure out what collectLines does -- UPDATE: I am pretty sure that
+	collectLines is a flag for whether we are doing a graphical rendering
+	of the raytrace results or instead if we are doing a non-graphical tabulation
+	of the raytrace data. It looks like in the function calls that originate in
+	other code, whenever collectLines is True, the Graphics2D argument g2d is null
+	However, when traceRay is called from GraphicDisplay, the Graphics2D object is
+	non-null and the collectLines Boolean is false */
 	public void traceRays(Graphics2D g2d, boolean collectLines) {
 		if (collectLines) {
 			lineList = new ArrayList<>();
@@ -189,15 +199,22 @@ final public class RayTraceComputer {
 		// testCount += 1;
 		// generate some rays
 
+
+		/* This is where we do some trigonometry, using global parameters from the
+		ProgramValues object, to figure out directions and things related to drawing
+		rays from the emitter */
 		double xSource = programValues.xBeamSourceRefPlane;
 		double xTarget = programValues.xBeamRotationPlane;
-		double ba = -programValues.beamAngle * Common.radians;
-		double tba = tan(ba) * (xSource - xTarget);
+		double ba = -programValues.beamAngle * Common.radians;	// convert degrees to radians
+		double tba = tan(ba) * (xSource - xTarget);							// this represents a vector in the y-direction
 		double min = programValues.yStartBeamPos;
 		double max = programValues.yEndBeamPos;
 		double rmin = min + tba;
 		double rmax = max + tba;
 		double xs = programValues.xBeamSourceRefPlane;
+
+		/* I am pretty sure that collectLines is a flag for whether we
+		are doing a graphical rendering or a non-graphical tabulation */
 		if (!collectLines) {
 			g2d.setColor(new MyColor(programValues.colorLightSource));
 			ComplexInt i = new ComplexInt();
@@ -208,7 +225,7 @@ final public class RayTraceComputer {
 		double count = max(programValues.beamCount, 1);
 		double topcount = max(programValues.beamCount - 1, 1);
 		for (int ray = 0; ray < count && ray < parent.maxLightRays; ray++) {
-			double y = Common.ntrp(ray, 0, topcount, min, max);
+			double y = Common.ntrp(ray, 0, topcount, min, max);			// ntrp probably means interpolate
 			double mya = (programValues.divergingSource) ? 0 : y;
 			double myb = y;
 			mya += tba;
@@ -217,7 +234,7 @@ final public class RayTraceComputer {
 			Color arrowCol = new MyColor(programValues.colorArrow);
 			// an alpha value used by the dispersion calculation
 			double pbalpha = pbcol.getAlpha() / 255.0;
-			if (programValues.dispersionBeams > 0) {
+			if (programValues.dispersionBeams > 0) { // dispersion
 				for (int dbeam = 0; dbeam < programValues.dispersionBeams; dbeam++) {
 					double top = max(programValues.dispersionBeams - 1, 1);
 					// h = hue component of HSV
@@ -332,7 +349,7 @@ final public class RayTraceComputer {
 						if (!debugIntersections) {
 							break;
 						}
-					} 
+					}
 					if (debugIntersections && !collectLines) {
 						fillScaledPoint(r.p, 8, g2d, cc);
 					}

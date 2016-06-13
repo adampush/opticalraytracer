@@ -197,9 +197,12 @@ final public class OpticalRayTracer {
 	private JLabel lblCenterThickness;
 	private JButton resetProgramButton;
 
+	/* This is my test text field */
+	private JTextField testTextField;
+
 	/**
 	 * Create the application.
-	 * 
+	 *
 	 * @param args
 	 */
 	public OpticalRayTracer(final String[] args) {
@@ -928,7 +931,7 @@ final public class OpticalRayTracer {
 			setDefaults(true);
 		}
 	}
-	
+
 	void eraseResetProgram() {
 		boolean[] reply = showConfirmMessage(
 				"Okay to reset program values to defaults\n(preserves entered components)?",
@@ -1185,7 +1188,7 @@ final public class OpticalRayTracer {
 		newMIrrorButton.setIcon(new ImageIcon(OpticalRayTracer.class
 				.getResource("/opticalraytracer/icons/view-fullscreen.png")));
 		toolBar.add(newMIrrorButton);
-		
+
 		resetProgramButton = new JButton("");
 		resetProgramButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1562,6 +1565,8 @@ final public class OpticalRayTracer {
 		colorToolBar = new JToolBar(fullAppName + " Program Colors");
 		controlBox.add(colorToolBar, BorderLayout.NORTH);
 
+		/* JPanel programControlPane appears to be used as a container for all the
+		individual control elements. */
 		JPanel programControlPane = new JPanel();
 		controlBox.add(programControlPane, BorderLayout.CENTER);
 		programControlPane.setLayout(new MigLayout("",
@@ -1717,5 +1722,13 @@ final public class OpticalRayTracer {
 		statusLabel.setFont(new Font("Courier", Font.BOLD, 12));
 		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		statusBar.add(statusLabel);
+
+		/* This is a test to see where the box ends up */
+		//testTextField = new JTextField();
+//		testTextField
+				//.setToolTipText("This value is a new test value");
+		//testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+		//testTextField.setColumns(10);
+		//programControlPane.add(testTextField, "cell 5 5");
 	}
 }
