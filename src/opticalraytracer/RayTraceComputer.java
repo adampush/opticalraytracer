@@ -248,7 +248,8 @@ final public class RayTraceComputer {
 							arrowCol, cw.wvl, programValues.maxIntersections,
 							collectLines);
 				}
-			} else { // no dispersion
+			}
+			else { // no dispersion
 				traceOneRay(ray, 0, xSource, mya, xTarget, myb, g2d,
 						parent.componentList, term, pbcol, arrowCol, 0,
 						programValues.maxIntersections, collectLines);
@@ -260,6 +261,8 @@ final public class RayTraceComputer {
 		return ((r.dot > 0) && (r.m > parent.programValues.interLensEpsilon));
 	}
 
+	/* traceOneRay is where we do the line-circle intersection thing. Points
+	x1,y1 and	x2,y2 define the line of infinite extent. */
 	void traceOneRay(int ray, int dbeam, double x1, double y1, double x2,
 			double y2, Graphics2D g2d, ArrayList<OpticalComponent> componentList,
 			Color terminalColor, Color beamColor, Color arrowColor,
@@ -284,7 +287,7 @@ final public class RayTraceComputer {
 		// entering means moving from air to medium IOR
 		boolean entering = true;
 		boolean reflector = false;
-		int rays = 0;
+		int rays = 0;		// Number of rays
 		String oldEvent = "Beam Origin";
 		String newEvent = oldEvent;
 		double initialBeamAngle = atan2(lineb.y - linea.y, lineb.x - linea.x);
@@ -296,7 +299,16 @@ final public class RayTraceComputer {
 			ArrayList<RayLensIntersection> intersections = new ArrayList<RayLensIntersection>();
 			for (OpticalComponent lens : componentList) {
 				if (lens.values.active) {
+					// TODO: can we do this up front and just use a list of ACTIVE
+					// components rather than check each individual component within the
+					// loop to see if it is active?
 					for (int i = 0; i <= 1; i++) {
+						// TODO: we're using a fixed 2 cycle for-loop here rather than just
+						// calling the appropriate functions (computeIntersections, etc.)
+						// twice -- once for "true" (left side) and once for "false" (right
+						// side). This could be because we could later generalize this to an
+						// component with an arbitrary number of surfaces.
+
 						// lens profile and intersection routines must be
 						// kept synchronized as to the lens side
 						lens.computeIntersections(oldrli, lens, i == 0, linea,

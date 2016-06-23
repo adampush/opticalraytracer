@@ -21,7 +21,7 @@
 package opticalraytracer;
 
 final public class ProgramValues extends ValueManager {
-	
+
 	int decimalPlaces = 4;
 	int windowX = 100;
 	int windowY = 100;
@@ -43,7 +43,7 @@ final public class ProgramValues extends ValueManager {
 	int colorTerminator = 0x000000;
 	int selectedTab = 0;
 	int selectedComponent = 0;
-	
+
 	int beamWidth = 1;
 	double xOffset = 0;
 	double yOffset = 0;
@@ -66,4 +66,7 @@ final public class ProgramValues extends ValueManager {
     int clipboardGraphicXSize = 1280;
     int helpScrollPos = 0;
     int tableLineLimit = 500;
+
+		/* TEST STUFF */
+		double testTextField = 1;
 }

@@ -224,23 +224,34 @@ final public class OpticalRayTracer {
 		lineAnalysis = new LineAnalysis(this);
 		initialize();
 
+		/* This is the radio button for optical object behavior: either refract,
+		reflect, or absorb. */
 		JRadioButton[] trb = new JRadioButton[] { refractRadioButton,
 				reflectRadioButton, absorbRadioButton };
 		// this allows numerical indexing of the radio buttons
 		typeRadioButtonList = new ArrayList<>(Arrays.asList(trb));
 
+		/* The "Design" control pane */
 		gPaneDesign = new GraphicDisplay(this, "design pane", Common.TAB_DESIGN);
 		designPane.add(gPaneDesign, SwingConstants.CENTER);
+
+		/* The "Configure" control pane */
 		gPaneConfigure = new GraphicDisplay(this, "configure pane",
 				Common.TAB_CONFIGURE);
 		configurePane.add(gPaneConfigure, SwingConstants.CENTER);
+
+		/* The overall window (?) */
 		frame.addWindowFocusListener(new WindowAdapter() {
 			public void windowGainedFocus(WindowEvent e) {
 				gPaneDesign.requestFocusInWindow();
 			}
 		});
+
+		/* InitializationManager does stuff with reading and writing configuration
+		files to and from the user's home directory */
 		initManager = new InitializationManager(this, programValues);
 
+		/* Create the data table for the data table pane */
 		dataTableDisplay = new DataTableDisplay(this);
 		dataTableDisplay.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		tableScrollPane = new JScrollPane(dataTableDisplay,
@@ -292,17 +303,30 @@ final public class OpticalRayTracer {
 
 		tableDataLabel = new JLabel("");
 		tableControlPane.add(tableDataLabel, "flowx,cell 4 0");
+
+		/* Create GUI controls for setting parameters of selected optical
+		component (Design tab) */
 		setupOpticalControlFields();
-		programControlList = new HashMap<>();
+
+		/* Create GUI controls for setting program parameters (Configure tab) */
+		programControlList = new HashMap<>();		//TODO: why is this instantiated here but the others are instantiated within the functions?
 		setupProgramControlFields();
+
+		/* Create GUI controls for setting program colors (Configure tab) */
 		setupColorButtons();
+
+		/* Set program icon */
 		ImageIcon programIcon = new ImageIcon(
 				OpticalRayTracer.class
 						.getResource("/opticalraytracer/icons/OpticalRayTracer.png"));
 		frame.setIconImage(programIcon.getImage());
 		frame.setTitle(fullAppName);
 
+		/* Reset all buttons via their reset() method. TODO: why? */
 		resetButtonColors();
+
+		/* Create Help tab TODO: why is this done here but the other tabs are
+		created in the initialize() function? */
 		helpPane = new JPanel();
 		tabbedPane
 				.addTab("Help",
@@ -318,20 +342,35 @@ final public class OpticalRayTracer {
 		tabbedPane.setMnemonicAt(Common.TAB_TABLE, KeyEvent.VK_T);
 		tabbedPane.setMnemonicAt(Common.TAB_HELP, KeyEvent.VK_H);
 		clearSelection();
+
+		/* Read in the program configuration from .ini file */
 		initManager.readConfig();
+
+		/* Initialize program window state and tab state */
 		frame.setBounds(programValues.windowX, programValues.windowY,
 				programValues.defaultWindowWidth,
 				programValues.defaultWindowHeight);
 		writeProgramControls();
 		writeElementControls();
+
+		/* Reset Undo and Redo stack */
 		resetUndoRedo();
+
+		/* Set the selected component to the ProgramValues hard-coded value*/
 		setSelectedComponent(programValues.selectedComponent);
+
+		/* Set the selected tab to the ProgramValues hard-coded value */
 		tabbedPane.setSelectedIndex(programValues.selectedTab);
+
+		/* Looks like we are setting up a new thread here to process tab changes
+		but it does not get executed until after all currently pending events are
+		processed (see SwingUtilities.invokeLater) */
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				processTabChange();
 			}
 		});
+
 		// test for command-line arguments
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -379,10 +418,12 @@ final public class OpticalRayTracer {
 		}
 	}
 
+	/* setupOpticalControlFields creates the GUI widgets that appear under the
+	"Design" tab */
 	void setupOpticalControlFields() {
 		ControlManager[] array = new ControlManager[] {
 				// The tag names must correspond to declared field names
-				// in the ComponentValues class
+				// in the ObjectValues class
 				new ControlManager(nameTextField, this, "name"),
 				new ControlManager(textFieldDoubleSensitivity, 0, 1e10,
 						lensRadiusTextField, this, "lensRadius"),
@@ -408,21 +449,24 @@ final public class OpticalRayTracer {
 						xPosTextField, this, "xPos"),
 				new ControlManager(textFieldDoubleSensitivity, -1e10, 1e10,
 						yPosTextField, this, "yPos"),
-				new ControlManager(1, -1e10, 1e10, angleTextField, this,
-						"angle"),
+				new ControlManager(1, -1e10, 1e10, angleTextField, this, "angle"),
 				new ControlManager(symmetricalCheckBox, this, "symmetrical"),
 				new ControlManager(activeCheckBox, this, "active"),
 				new ControlManager(refractRadioButton, this, "function"),
 				new ControlManager(reflectRadioButton, this, "function"),
 				new ControlManager(absorbRadioButton, this, "function"),
 				new ControlManager(leftCurvComboBox, this, "leftCurvature"),
-				new ControlManager(rightCurvComboBox, this, "rightCurvature"), };
+				new ControlManager(rightCurvComboBox, this, "rightCurvature") };
+
+		/* Instantiate HashMap to store all these ControlManagers in */
 		objectControlList = new HashMap<>();
 		for (ControlManager cm : array) {
 			objectControlList.put(cm.getTag(), cm);
 		}
 	}
 
+	/* setupProgramControlFields creates the GUI control widgets that appear under
+	the "Configure" tab */
 	void setupProgramControlFields() {
 		ControlManager[] array = new ControlManager[] {
 				// The tag names must correspond to declared field names
@@ -462,9 +506,18 @@ final public class OpticalRayTracer {
 				new ControlManager(antiAliasCheckBox, this, "antialias"),
 				new ControlManager(showControlsCheckBox, this, "showControls"),
 				new ControlManager(divergingBeamsCheckBox, this,
-						"divergingSource") };
+						"divergingSource"),
 		// new ControlManager(rotateFromXCheckBox, this, "rotXZero"), };
 
+		/* TEST STUFF */
+				new ControlManager(textFieldDoubleSensitivity, 0, 1000,
+					testTextField, this, "testTextField") };
+
+		/* HashMap programControlList was already instantiated (TODO: why?) so we
+		just go ahead and store all these ControlManagers in it. UPDATE: I think it
+		is because the programControlList is also used in the setupcolorButtons()
+		method, while the objectControlList is only used in the
+		setupOpticalControlFields() method */
 		for (ControlManager cm : array) {
 			programControlList.put(cm.getTag(), cm);
 		}
@@ -473,7 +526,7 @@ final public class OpticalRayTracer {
 	void setupColorButtons() {
 		ColorButton[] array = new ColorButton[] {
 				// The tag names must correspond to names of declared fields
-				// in the program values class
+				// in the ProgramValues class
 				new ColorButton(this, "colorBaseline",
 						"X/Y Zero Baseline color"),
 				new ColorButton(this, "colorGrid", "Grid color"),
@@ -606,6 +659,8 @@ final public class OpticalRayTracer {
 		setupSelectedComponent();
 	}
 
+	/* Loop through all the ProgramControls, get thecorresponding value from the
+	ProgramValues, and set the valueof the ProgramControl to that value */
 	void writeProgramControls() {
 		for (ProgramControl cm : programControlList.values()) {
 			cm.setValue(programValues.getOneValue(cm.getTag()));
@@ -1723,12 +1778,17 @@ final public class OpticalRayTracer {
 		statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		statusBar.add(statusLabel);
 
-		/* This is a test to see where the box ends up */
-		//testTextField = new JTextField();
-//		testTextField
-				//.setToolTipText("This value is a new test value");
-		//testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-		//testTextField.setColumns(10);
-		//programControlPane.add(testTextField, "cell 5 5");
+		/* TEST STUFF */
+		/* For proper alignment the label should be in even column and the text box should
+		 * be in odd column. */
+		lblTestTextField = new JLabel("Test Text Field");
+		programControlPane.add(lblTestTextField, "cell 6 0,alignx trailing");
+
+		testTextField = new JTextField();
+		testTextField.setToolTipText("The testTextField box is for testing");
+		testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+		testTextField.setColumns(10);
+		programControlPane.add(testTextField, "cell 7 0");
+		/* END TEST STUFF */
 	}
 }

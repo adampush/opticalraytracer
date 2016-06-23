@@ -258,7 +258,7 @@ final public class OpticalComponent {
 		if(values.rightCurvature == Common.CURVATURE_PLANAR) rightSurface = -internalThickness;
 		// compute lens center thickness
 		values.centerThickness = max(leftSurface - rightSurface , 0);
-		// values.centerThickness is included in the 
+		// values.centerThickness is included in the
 		// ObjectValues instance only to make it
 		// accessible externally -- setting its value has no effect,
 		// it is a "write-only" value
@@ -496,12 +496,30 @@ final public class OpticalComponent {
 		return v;
 	}
 
+	/**
+	  * Causes the left or right side optical element (surface) to compute the
+		* refracted (or reflected) vector.
+		*
+		* @param	oldrli		not used
+		* @param	oc			  The OpticalComponent of which the element will be analyzed
+		* @param  leftSide 	A flag boolean to compute for the left-side element if true
+		* @param  p1				The first of two vectors, the difference of which defines the ray vector to be analyzed
+		* @param  p2				The second of two vectors, the difference of which defines the ray vectory to be analyzed
+		*/
 	void computeIntersections(RayLensIntersection oldrli, OpticalComponent oc,
 			boolean leftSide, Vector p1, Vector p2) {
+
+		// TODO: RayLensIntersection oldrli is a function argument but it does not
+		// appear to be used by this function.
+
+		// We don't know what the specific type of element is, so we call via the
+		// ElementBase interface rather than cast as a specific class.
 		ElementBase element = getElement(leftSide);
 
+		// Again, we don't know what the specific type of element is, but we know
+		// that all the elements implement the ElementBase interface so we can call
+		// the intersections() function via that common interface.
 		element.intersections(oc, leftSide, p1, p2);
-
 	}
 
 	double tangent(boolean leftSide, boolean entering, Vector p, double ar,
