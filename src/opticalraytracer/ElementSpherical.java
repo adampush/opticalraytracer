@@ -66,35 +66,23 @@ final public class ElementSpherical implements ElementBase {
 	// /netbackup/data/java2/OpticalRayTracer_eclipse/python_equation_generator/new_spherical_equation_solutions.py
 
 	private double pa0(double r, double s, double x_1, double y_1) {
-		return -(s * s * y_1 + s * x_1 + sqrt(s
-				* s
-				* (r * r * s * s + r * r - s * s * x_1 * x_1 + 2 * s * x_1
-						* y_1 - y_1 * y_1)))
-				/ (s * (s * s + 1));
+		return -(s*s*y_1 + s*x_1 + sqrt(s*s*(r*r*s*s + r*r - s*s*x_1*x_1 + 2*s*x_1*y_1 - y_1*y_1)))
+				/ (s*(s*s + 1));
 	}
 
 	private double pa1(double r, double s, double x_1, double y_1) {
-		return -(s * s * y_1 + s * x_1 + sqrt(s
-				* s
-				* (r * r * s * s + r * r - s * s * x_1 * x_1 + 2 * s * x_1
-						* y_1 - y_1 * y_1)))
-				/ (s * s + 1);
+		return -(s*s*y_1 + s*x_1 + sqrt(s*s*(r*r*s*s + r*r - s*s*x_1*x_1 + 2*s*x_1*y_1 - y_1*y_1)))
+				/ (s*s + 1);
 	}
 
 	private double pa2(double r, double s, double x_1, double y_1) {
-		return (-s * (s * y_1 + x_1) + sqrt(s
-				* s
-				* (r * r * s * s + r * r - s * s * x_1 * x_1 + 2 * s * x_1
-						* y_1 - y_1 * y_1)))
-				/ (s * (s * s + 1));
+		return (-s*(s*y_1 + x_1) + sqrt(s*s*(r*r*s*s + r*r - s*s*x_1*x_1 + 2*s*x_1*y_1 - y_1*y_1)))
+				/ (s*(s*s + 1));
 	}
 
 	private double pa3(double r, double s, double x_1, double y_1) {
-		return (-s * (s * y_1 + x_1) + sqrt(s
-				* s
-				* (r * r * s * s + r * r - s * s * x_1 * x_1 + 2 * s * x_1
-						* y_1 - y_1 * y_1)))
-				/ (s * s + 1);
+		return (-s*(s*y_1 + x_1) + sqrt(s*s*(r*r*s*s + r*r - s*s*x_1*x_1 + 2*s*x_1*y_1 - y_1*y_1)))
+				/ (s*s + 1);
 	}
 
 	private double pb(double y, double r, double x_1, double y_1) {
@@ -115,8 +103,10 @@ final public class ElementSpherical implements ElementBase {
 	 * ------------------------------------------------------
 	 */
 
-	public void intersections(OpticalComponent oc, boolean leftSide,
-			Vector op1, Vector op2) {
+	/**
+	 * 
+	 */
+	public void intersections(OpticalComponent oc, boolean leftSide, Vector op1, Vector op2) {
 		// Common.p("---------- intersections ------------");
 
 		for (Vector p : points) {
@@ -130,8 +120,7 @@ final public class ElementSpherical implements ElementBase {
 
 		// a somewhat hacky way to avoid the on-axis zero problem
 		while (true) {
-			thr = new Vector(-oc.signedThickness(leftSide), 0)
-					.rotate(angleRadians);
+			thr = new Vector(-oc.signedThickness(leftSide), 0).rotate(angleRadians);
 			tc = new Vector(oc.xPos(), oc.yPos()).translate(thr);
 			p1 = new Vector(op1).translateSub(tc).rotate(-angleRadians);
 			p2 = new Vector(op2).translateSub(tc).rotate(-angleRadians);

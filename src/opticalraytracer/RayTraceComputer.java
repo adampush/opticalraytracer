@@ -129,15 +129,30 @@ final public class RayTraceComputer {
 		drawScaledLine(p.x, p.y, op, g, draw);
 	}
 
-	void drawScaledLine(double x, double y, ComplexInt op, Graphics2D g,
-			boolean draw) {
+	/** 
+	 * Draw a "scaled line" which is a line defined in system coordinate space 
+	 * but then is scaled so that it is drawn correctly in display space. The 
+	 * ComplexInt op input argument is replaced by the scaled display space point.
+	 *
+	 * @param x		- X coordinate of new point
+	 * @param y		- Y coordinate of new point
+	 * @param op 	- Original Point. Note that this object is modified by this function. It is 
+	 * 				replaced by the scaled display space point.
+	 * @param g		- Graphics2D object that will do the drawing
+	 * @param draw	- Boolean to tell whether or not to actually draw
+	 */
+	void drawScaledLine(double x, double y, ComplexInt op, Graphics2D g, boolean draw) {
+		// Check to make sure that both x and y are numbers
 		if (Double.isNaN(x) || Double.isNaN(y)) {
 			return;
 		}
+		// Check if we need to clip y-coordinate to space size
 		y = min(y, parent.programValues.virtualSpaceSize);
 		y = max(y, -parent.programValues.virtualSpaceSize);
+		// Check if we need to clip x-coordinate to space size
 		x = min(x, parent.programValues.virtualSpaceSize);
 		x = max(x, -parent.programValues.virtualSpaceSize);
+		// Create a ComplexInt, sp, that represents the original point in display space
 		ComplexInt sp = scalePoint(x, y);
 		if (draw) {
 			g.drawLine(op.x, op.y, sp.x, sp.y);
@@ -184,13 +199,12 @@ final public class RayTraceComputer {
 		drawScaledLine(x, p2.y, i, g, true);
 	}
 
-	/* TODO: figure out what collectLines does -- UPDATE: I am pretty sure that
-	collectLines is a flag for whether we are doing a graphical rendering
-	of the raytrace results or instead if we are doing a non-graphical tabulation
-	of the raytrace data. It looks like in the function calls that originate in
-	other code, whenever collectLines is True, the Graphics2D argument g2d is null
-	However, when traceRay is called from GraphicDisplay, the Graphics2D object is
-	non-null and the collectLines Boolean is false */
+	/**
+	 * Executes the ray-tracing algorithm. 
+	 * @param g2d			- GraphicsDisplay2D object that does the drawing.
+	 * @param collectLines	- If True, do not actually draw the lines. The rays are traced
+	 * 						for tabulation only.
+	 */
 	public void traceRays(Graphics2D g2d, boolean collectLines) {
 		if (collectLines) {
 			lineList = new ArrayList<>();
@@ -200,25 +214,25 @@ final public class RayTraceComputer {
 		// generate some rays
 
 
-		/* This is where we do some trigonometry, using global parameters from the
+		/* This is where we do some trigonometry, using program parameters from the
 		ProgramValues object, to figure out directions and things related to drawing
 		rays from the emitter */
 		double xSource = programValues.xBeamSourceRefPlane;
 		double xTarget = programValues.xBeamRotationPlane;
-		double ba = -programValues.beamAngle * Common.radians;	// convert degrees to radians
-		double tba = tan(ba) * (xSource - xTarget);							// this represents a vector in the y-direction
+		double ba = programValues.beamAngle * Common.radians;	// convert degrees to radians
+		double tba = tan(ba) * (xTarget - xSource);				// this represents a vector in the y-direction
 		double min = programValues.yStartBeamPos;
 		double max = programValues.yEndBeamPos;
 		double rmin = min + tba;
 		double rmax = max + tba;
 		double xs = programValues.xBeamSourceRefPlane;
 
-		/* I am pretty sure that collectLines is a flag for whether we
-		are doing a graphical rendering or a non-graphical tabulation */
 		if (!collectLines) {
 			g2d.setColor(new MyColor(programValues.colorLightSource));
 			ComplexInt i = new ComplexInt();
+			// First move the "draw cursor" to (Xsource,Ymin) but don't draw that line
 			drawScaledLine(xs, rmin, i, g2d, false);
+			// Then draw the vertical "source line"
 			drawScaledLine(xs, rmax, i, g2d, true);
 		}
 
@@ -261,8 +275,24 @@ final public class RayTraceComputer {
 		return ((r.dot > 0) && (r.m > parent.programValues.interLensEpsilon));
 	}
 
-	/* traceOneRay is where we do the line-circle intersection thing. Points
-	x1,y1 and	x2,y2 define the line of infinite extent. */
+	/**
+	 * This function does the line-circle intersection thing. Points x1,y1 and x2,y2 
+	 * define the line of infinite extent.
+	 * @param ray				- Numerical index of the ray to be traced (n of N).
+	 * @param dbeam				- TBD
+	 * @param x1				- X coordinate of ray origin (TBR).
+	 * @param y1				- Y coordinate of ray origin (TBR).
+	 * @param x2				- X coordinate of ray destination (TBR).
+	 * @param y2				- Y coordinate of ray destination (TBR).
+	 * @param g2d				- GraphicsDisplay2D object that will do the drawing.
+	 * @param componentList		- List of optical components.
+	 * @param terminalColor		- Color of the terminating arrowhead.
+	 * @param beamColor			- Color of the beam line.
+	 * @param arrowColor		- Color of the intermediate, non-terminating arrowheads.
+	 * @param wavelength		- Wavelength of light, used for dispersion computation.
+	 * @param maxIntersections  - Maximum number of intersections to compute.
+	 * @param collectLines		- If true, do not actually do drawings stuff (tabulation only)
+	 */
 	void traceOneRay(int ray, int dbeam, double x1, double y1, double x2,
 			double y2, Graphics2D g2d, ArrayList<OpticalComponent> componentList,
 			Color terminalColor, Color beamColor, Color arrowColor,
@@ -311,13 +341,10 @@ final public class RayTraceComputer {
 
 						// lens profile and intersection routines must be
 						// kept synchronized as to the lens side
-						lens.computeIntersections(oldrli, lens, i == 0, linea,
-								lineb);
+						lens.computeIntersections(oldrli, lens, i == 0, linea, lineb);
 						for (Vector pt : lens.getElement(i == 0).getPoints()) {
 							if (lens.inside(pt, lens.opticalTestPolygon)) {
-								intersections.add(new RayLensIntersection(
-										linea, lineb, wavelength, pt, i == 0,
-										lens));
+								intersections.add(new RayLensIntersection(linea, lineb, wavelength, pt, i == 0,	lens));
 							}
 						}
 
@@ -354,7 +381,8 @@ final public class RayTraceComputer {
 							rli = r;
 							// accepted target: green
 							cc = new MyColor(0x00ff00);
-						} else {
+						} 
+						else {
 							// passed up: purple
 							cc = new MyColor(0x80ff00ff);
 						}
@@ -365,7 +393,8 @@ final public class RayTraceComputer {
 					if (debugIntersections && !collectLines) {
 						fillScaledPoint(r.p, 8, g2d, cc);
 					}
-				} else {
+				} 
+				else {
 					//Common.p("test r: " + r);
 					if (testIntersection(r)) {
 						rli = r;
@@ -386,6 +415,11 @@ final public class RayTraceComputer {
 				if (!collectLines) {
 					drawScaledLine(linea, op, g2d, false);
 					drawScaledLine(rli.p, op, g2d, true);
+					
+					// AJP test
+					ComplexInt foo = new ComplexInt();
+					drawScaledLine(new Vector(0,0), foo, g2d, false);
+					drawScaledLine(new Vector(10,10), foo, g2d, true);
 				}
 				// incident light angle vector
 				Vector via = lineb.sub(linea).normalize();
@@ -491,6 +525,80 @@ final public class RayTraceComputer {
 			} else {
 				lineList.add(new LineData(ray, dbeam, wavelength, oldrli, rli,
 						linea, p, 0, oldEvent, newEvent));
+			}
+		}
+	}
+
+	/**
+	 * Executes the ray-tracing algorithm. 
+	 * @param g2d			- GraphicsDisplay2D object that does the drawing.
+	 * @param collectLines	- If True, do not actually draw the lines. The rays are traced
+	 * 						for tabulation only.
+	 */
+	public void traceRaysAJP(Graphics2D g2d, boolean collectLines) {
+		if (collectLines) {
+			lineList = new ArrayList<>();
+		}
+		// parent.p("traceRays: " + testCount);
+		// testCount += 1;
+		// generate some rays
+
+
+		/* This is where we do some trigonometry, using program parameters from the
+		ProgramValues object, to figure out directions and things related to drawing
+		rays from the emitter */
+		//double xSource = programValues.xBeamSourceRefPlane;
+		double xSource = programValues.testX;
+		double xTarget = programValues.xBeamRotationPlane;
+		double ba = programValues.beamAngle * Common.radians;	// convert degrees to radians
+		double tba = tan(ba) * (xTarget - xSource);				// this represents a vector in the y-direction
+		double min = programValues.yStartBeamPos;
+		double max = programValues.yEndBeamPos;
+		double rmin = min + tba;
+		double rmax = max + tba;
+		//double xs = programValues.xBeamSourceRefPlane;
+		double xs = programValues.testX;
+
+		if (!collectLines) {
+			g2d.setColor(new MyColor(programValues.colorLightSource));
+			ComplexInt i = new ComplexInt();
+			// First move the "draw cursor" to (Xsource,Ymin) but don't draw that line
+			drawScaledLine(xs, rmin, i, g2d, false);
+			// Then draw the vertical "source line"
+			drawScaledLine(xs, rmax, i, g2d, true);
+		}
+
+		double count = max(programValues.beamCount, 1);
+		double topcount = max(programValues.beamCount - 1, 1);
+		for (int ray = 0; ray < count && ray < parent.maxLightRays; ray++) {
+			double y = Common.ntrp(ray, 0, topcount, min, max);			// ntrp probably means interpolate
+			double mya = (programValues.divergingSource) ? 0 : y;
+			double myb = y;
+			mya += tba;
+			Color term = new MyColor(programValues.colorTerminator);
+			Color pbcol = new MyColor(programValues.colorBeam);
+			Color arrowCol = new MyColor(programValues.colorArrow);
+			// an alpha value used by the dispersion calculation
+			double pbalpha = pbcol.getAlpha() / 255.0;
+			if (programValues.dispersionBeams > 0) { // dispersion
+				for (int dbeam = 0; dbeam < programValues.dispersionBeams; dbeam++) {
+					double top = max(programValues.dispersionBeams - 1, 1);
+					// h = hue component of HSV
+					double h = Common.ntrp(dbeam, 0, top, 0, 1);
+					WavelengthColor cw = new WavelengthColor(h);
+					// borrow alpha from normal beam color
+					MyColor colorWavelength = new MyColor(cw.r, cw.g, cw.b,
+							pbalpha);
+					traceOneRay(ray, dbeam, xSource, mya, xTarget, myb, g2d,
+							parent.componentList, term, colorWavelength,
+							arrowCol, cw.wvl, programValues.maxIntersections,
+							collectLines);
+				}
+			}
+			else { // no dispersion
+				traceOneRay(ray, 0, xSource, mya, xTarget, myb, g2d,
+						parent.componentList, term, pbcol, arrowCol, 0,
+						programValues.maxIntersections, collectLines);
 			}
 		}
 	}

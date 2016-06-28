@@ -20,6 +20,8 @@
 
 package opticalraytracer;
 
+// test comment
+
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -199,6 +201,9 @@ final public class OpticalRayTracer {
 
 	/* This is my test text field */
 	private JTextField testTextField;
+	private JTextField testXTextField;
+	private JTextField testY;
+	private JTextField testNum;
 
 	/**
 	 * Create the application.
@@ -418,8 +423,9 @@ final public class OpticalRayTracer {
 		}
 	}
 
-	/* setupOpticalControlFields creates the GUI widgets that appear under the
-	"Design" tab */
+	/** Creates the GUI widgets that appear under the "Design" tab.
+	 *
+	 */
 	void setupOpticalControlFields() {
 		ControlManager[] array = new ControlManager[] {
 				// The tag names must correspond to declared field names
@@ -510,8 +516,12 @@ final public class OpticalRayTracer {
 		// new ControlManager(rotateFromXCheckBox, this, "rotXZero"), };
 
 		/* TEST STUFF */
-				new ControlManager(textFieldDoubleSensitivity, 0, 1000,
-					testTextField, this, "testTextField") };
+				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testTextField, this, "testTextField"),
+				new ControlManager(textFieldDoubleSensitivity, -1e10, 1e10,	testXTextField, this, "testX"),
+				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testY, this, "testY"),
+				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testNum, this, "testNum")
+		};
+
 
 		/* HashMap programControlList was already instantiated (TODO: why?) so we
 		just go ahead and store all these ControlManagers in it. UPDATE: I think it
@@ -687,14 +697,18 @@ final public class OpticalRayTracer {
 	}
 
 	void checkXSourcePlane() {
-		double x = programValues.xBeamSourceRefPlane;
+		//double x = programValues.xBeamSourceRefPlane;
+		// AJP test
+		double x = programValues.testX;
 		if (abs(x) > programValues.virtualSpaceSize) {
 			showNotifyMessage(
 					"The X source plane cannot lie outside the\nvirtual space box size -- adjusting value.",
 					"X source outside domain");
 			x = max(x, -programValues.virtualSpaceSize);
 			x = min(x, programValues.virtualSpaceSize);
-			programValues.xBeamSourceRefPlane = x;
+			//programValues.xBeamSourceRefPlane = x;
+			// AJP test
+			programValues.testX = x;
 			writeProgramControls();
 		}
 	}
@@ -1083,6 +1097,13 @@ final public class OpticalRayTracer {
 		setClipboardContents(data);
 	}
 
+	/**
+	 *
+	 * @param x	- X coordinate in system space coordinate frame
+	 * @param y	- Y coordinate in system space coordinate frame
+	 * @return 	Transformed point in display space which represents the input X,Y point
+	 * 			from system space
+	 */
 	ComplexInt spaceToDisplay(double x, double y) {
 		int dx = (int) (((x - programValues.xOffset) * programValues.dispScale * ySize) + xCenter);
 		int dy = (int) (yCenter - ((y - programValues.yOffset)
@@ -1781,7 +1802,7 @@ final public class OpticalRayTracer {
 		/* TEST STUFF */
 		/* For proper alignment the label should be in even column and the text box should
 		 * be in odd column. */
-		lblTestTextField = new JLabel("Test Text Field");
+		JLabel lblTestTextField = new JLabel("Test Text Field");
 		programControlPane.add(lblTestTextField, "cell 6 0,alignx trailing");
 
 		testTextField = new JTextField();
@@ -1789,6 +1810,36 @@ final public class OpticalRayTracer {
 		testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		testTextField.setColumns(10);
 		programControlPane.add(testTextField, "cell 7 0");
+
+
+		JLabel lblTestXTextField = new JLabel("Test X");
+		programControlPane.add(lblTestXTextField, "cell 6 1,alignx trailing");
+
+		testXTextField = new JTextField();
+		testXTextField.setToolTipText("The testTextField box is for testing");
+		testXTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+		programControlPane.add(testXTextField, "cell 7 1");
+		testXTextField.setColumns(10);
+
+
+		JLabel lblTestY = new JLabel("Test Y");
+		programControlPane.add(lblTestY, "cell 6 2, alignx trailing");
+
+		testY = new JTextField();
+		testY.setToolTipText("The testTextField box is for testing");
+		testY.setHorizontalAlignment(SwingConstants.RIGHT);
+		testY.setColumns(10);
+		programControlPane.add(testY, "cell 7 2");
+
+
+		JLabel lblTestNum = new JLabel("Test Num");
+		programControlPane.add(lblTestNum, "cell 6 3, alignx trailing");
+
+		testNum = new JTextField();
+		testNum.setToolTipText("The testTextField box is for testing");
+		testNum.setHorizontalAlignment(SwingConstants.RIGHT);
+		testNum.setColumns(10);
+		programControlPane.add(testNum, "cell 7 3");
 		/* END TEST STUFF */
 	}
 }

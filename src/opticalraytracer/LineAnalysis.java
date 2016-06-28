@@ -140,12 +140,16 @@ final public class LineAnalysis {
 	}
 
 	protected String makeHTMLTable(boolean linefeeds) {
-		parent.rayTraceComputer.traceRays(null, true);
+		//parent.rayTraceComputer.traceRays(null, true);
+		// AJP test
+		parent.rayTraceComputer.traceRaysAJP(null, true);
 		return createHTMLTable(linefeeds);
 	}
 
 	protected String makeCSVTable() {
-		parent.rayTraceComputer.traceRays(null, true);
+		//parent.rayTraceComputer.traceRays(null, true);
+		// AJP test
+		parent.rayTraceComputer.traceRaysAJP(null, true);
 		StringBuilder sb = new StringBuilder();
 		sb.append(makeHeader("\t"));
 		sb.append("\n");
@@ -173,7 +177,9 @@ final public class LineAnalysis {
 	protected void nearestLineProperties(double mx, double my) {
 		//Common.p("nearestlineproperties");
 		closestLine = null;
-		parent.rayTraceComputer.traceRays(null, true);
+		//parent.rayTraceComputer.traceRays(null, true);
+		// AJP tets
+		parent.rayTraceComputer.traceRaysAJP(null, true);
 		minValue = 1e9;
 		for (LineData ld : parent.rayTraceComputer.lineList) {
 			compare(ld, mx, my);

@@ -44,6 +44,11 @@ final public class Vector {
 		y = v.y;
 	}
 
+	/**
+	 * Translates this vector via vector addition.
+	 * @param p	- Vector p is added to this Vector to create a new Vector
+	 * @return	A new Vector v = this + p
+	 */
 	public Vector translate(Vector p) {
 		return new Vector(x + p.x, y + p.y);
 	}
@@ -51,7 +56,12 @@ final public class Vector {
 	public Vector translate(double px, double py) {
 		return new Vector(x + px, y + py);
 	}
-
+	
+	/**
+	 * Translates this vector via vector subtraction.
+	 * @param p	- Vector p is subtracted from this Vector to create a new Vector
+	 * @return	A new Vector v = this - p 
+	 */
 	public Vector translateSub(Vector p) {
 		return new Vector(x - p.x, y - p.y);
 	}

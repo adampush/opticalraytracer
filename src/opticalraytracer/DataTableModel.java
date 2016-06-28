@@ -84,7 +84,9 @@ final public class DataTableModel extends AbstractTableModel {
 
 		protected void updateDisplay() {
 			if (parent.rayTraceComputer != null) {
-				parent.rayTraceComputer.traceRays(null, true);
+				//parent.rayTraceComputer.traceRays(null, true);
+				// AJP test
+				parent.rayTraceComputer.traceRaysAJP(null,true);
 				if (parent.rayTraceComputer.lineList != null && parent.rayTraceComputer.lineList.size() > 0) {
 					final int limit = parent.programValues.tableLineLimit;
 					int len = parent.rayTraceComputer.lineList.size();

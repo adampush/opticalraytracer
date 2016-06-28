@@ -497,17 +497,16 @@ final public class OpticalComponent {
 	}
 
 	/**
-	  * Causes the left or right side optical element (surface) to compute the
-		* refracted (or reflected) vector.
-		*
-		* @param	oldrli		not used
-		* @param	oc			  The OpticalComponent of which the element will be analyzed
-		* @param  leftSide 	A flag boolean to compute for the left-side element if true
-		* @param  p1				The first of two vectors, the difference of which defines the ray vector to be analyzed
-		* @param  p2				The second of two vectors, the difference of which defines the ray vectory to be analyzed
-		*/
-	void computeIntersections(RayLensIntersection oldrli, OpticalComponent oc,
-			boolean leftSide, Vector p1, Vector p2) {
+	 * Causes the left or right side optical element (surface) to compute the
+	 * refracted (or reflected) vector.
+	 *
+	 * @param oldrli	not used
+	 * @param oc		The OpticalComponent of which the element will be analyzed
+	 * @param leftSide 	A flag boolean to compute for the left-side element if true
+	 * @param p1		The first of two vectors, the difference of which defines the ray vector to be analyzed
+	 * @param p2		The second of two vectors, the difference of which defines the ray vectory to be analyzed
+	 */
+	void computeIntersections(RayLensIntersection oldrli, OpticalComponent oc, boolean leftSide, Vector p1, Vector p2) {
 
 		// TODO: RayLensIntersection oldrli is a function argument but it does not
 		// appear to be used by this function.
@@ -546,11 +545,12 @@ final public class OpticalComponent {
 		}
 		Polygon p = new Polygon();
 		int col = programValues.colorLensOutline;
-		boolean selected = parent.selectedComponent != null
+		boolean selected = parent.selectedComponent != null		// selected if parent selected component is not null and also equals this
 				&& parent.selectedComponent == this;
 		if (selected) {
 			col = programValues.colorLensSelected;
-		} else if (!values.active) {
+		}
+		else if (!values.active) {
 			col = programValues.colorGrid;
 		}
 		MyColor cc = new MyColor(col, 255);
@@ -567,6 +567,11 @@ final public class OpticalComponent {
 		g.fillPolygon(p);
 	}
 
+	/**
+	 * 
+	 * @param y		
+	 * @param ccx	
+	 */
 	Vector lensXforY(double y, double ccx) {
 		// left
 		double a = getElement(true).lensProfileXforY(this, true, y, ccx);

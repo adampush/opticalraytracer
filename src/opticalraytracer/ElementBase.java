@@ -23,13 +23,39 @@ package opticalraytracer;
 import java.util.ArrayList;
 
 public interface ElementBase {
-	public void intersections(OpticalComponent oc, boolean leftSide,
-			Vector op1, Vector op2);
 	
-	public double lensProfileXforY(OpticalComponent oc, boolean leftSide,
-			double y, double cx);
+	/**
+	 * I'm the interface.
+	 * @param oc		- OpticalComponent associated with this Element
+	 * @param leftSide	- If true, do stuff for left side element. If false, for right side.
+	 * @param op1		- 
+	 * @param op2		- 
+	 */
+	public void intersections(OpticalComponent oc, boolean leftSide, Vector op1, Vector op2);
 	
+	/**
+	 * 
+	 * @param oc
+	 * @param leftSide
+	 * @param y
+	 * @param cx
+	 * @return
+	 */
+	public double lensProfileXforY(OpticalComponent oc, boolean leftSide, double y, double cx);
+	
+	/**
+	 * 
+	 * @param oc
+	 * @param leftSide
+	 * @param entering
+	 * @param y
+	 * @return
+	 */
 	public double lensProfileDXforY(OpticalComponent oc, boolean leftSide,boolean entering, double y);
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public ArrayList<Vector> getPoints();
 }

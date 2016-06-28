@@ -34,6 +34,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
+// AJP test imports
+import java.lang.System;
+
 @SuppressWarnings("serial")
 final public class GraphicDisplay extends JPanel {
 
@@ -430,6 +433,14 @@ final public class GraphicDisplay extends JPanel {
 		g.drawImage(parent.image, 0, 0, null);
 	}
 
+	/**
+	 * NOTE: The call hierarchy for this function is empty, suggesting that it is
+	 * a vestigial function and does not ever get called.
+	 * 
+	 * @param g
+	 * @param x
+	 * @param y
+	 */
 	// allows drawing any size
 	void drawData(Graphics g, int x, int y) {
 		rayTraceProcessCore(x, y,false);
@@ -450,46 +461,99 @@ final public class GraphicDisplay extends JPanel {
 		}
 	}
 
+	/**
+	 * This is one of the most important functions in the program. This function 
+	 * draws the background, grid, lenses and traces rays.
+	 * 
+	 * @param w				Width of the draw area
+	 * @param h				Height of the draw area
+	 * @param forceFocus	TBD
+	 */
 	void rayTraceProcessCore(int w, int h, boolean forceFocus) {
 		// parent.p("raytraceprocesscore: " + name);
-		if (updateGraphicBuffer(w, h)) {
+		if (updateGraphicBuffer(w, h)) {	// If successful
+			// Enable the unselect button if there is a selected component
 			parent.unselectButton.setEnabled(parent.selectedComponent != null);
-			Graphics2D bg = (Graphics2D) parent.image.getGraphics();
+
+			// TODO: look into replacing getGraphics() with createGraphics(), as advised by javadoc
+//			Graphics2D bg = (Graphics2D) parent.image.getGraphics();
+			Graphics2D bg = parent.image.createGraphics();
+
+			// If antialiasing box is checked, enable it 
 			if (programValues.antialias) {
 				RenderingHints rh = new RenderingHints(
 						RenderingHints.KEY_ANTIALIASING,
 						RenderingHints.VALUE_ANTIALIAS_ON);
 				bg.addRenderingHints(rh);
 			}
-			Color bgColor = (hasFocus || forceFocus)?new Color(
-					programValues.inverse ? programValues.colorLowBackground
-							: programValues.colorHighBackground):
-								programValues.inverse ?Common.noFocusInverse:
-								Common.noFocusHi;
+			
+//			------ Original code ------
+//			Color bgColor = (hasFocus || forceFocus) ? new Color(
+//					programValues.inverse ? programValues.colorLowBackground : programValues.colorHighBackground) :
+//					programValues.inverse ? Common.noFocusInverse :	Common.noFocusHi;
+			
+			// Set background color depending on status of inverse and focus
+			Color bgColor = null;
+			if (hasFocus || forceFocus) {
+				if (programValues.inverse) {
+					bgColor = new Color(programValues.colorLowBackground);
+				}
+				else {
+					bgColor = new Color(programValues.colorHighBackground);
+				}
+			}
+			else {
+				if (programValues.inverse){
+					bgColor = Common.noFocusInverse;
+				}
+				else {
+					bgColor = Common.noFocusHi;
+				}
+			}
 			bg.setColor(bgColor);
 			bg.fillRect(0, 0, parent.image.getWidth(), parent.image.getHeight());
+			
+			// Set stroke width
 			if (programValues.beamWidth > 1) {
 				bg.setStroke(new BasicStroke((int) programValues.beamWidth));
 			}
+			// Draw grid
 			if (programValues.showGrid) {
 				rayTraceComputer.drawGrid(bg);
 				rayTraceComputer.drawBaselines(bg);
 			}
+			// Draw lenses
 			rayTraceComputer.drawLenses(bg);
+			// Trace rays (Lutus Original)
 			rayTraceComputer.traceRays(bg, false);
+			
+			// AJP test
+			//long ddd = System.currentTimeMillis();
+			//Common.p("End of rayTraceProcessCore(): " + ddd);
+			rayTraceComputer.traceRaysAJP(bg, false);
+			
+			// Dispose of the graphics object
 			bg.dispose();
 		}
 	}
 
+	/**
+	 * 
+	 * @param x	- The X size of the buffer
+	 * @param y	- The Y size of the buffer
+	 * @return 	True if successful, False if unsuccessful. Successful if x and y are both
+	 * 			greater than zero.
+	 */
 	boolean updateGraphicBuffer(int x, int y) {
 		boolean success = false;
 		if (x > 0 && y > 0) {
 			success = true;
+			// Check if there is a discrepancy between the input x and y and the 
+			// program xSize and ySize and then update the parent values if needed.
 			if (parent.image == null || parent.xSize != x || parent.ySize != y) {
 				parent.xSize = x;
 				parent.ySize = y;
-				parent.image = new BufferedImage(x, y,
-						BufferedImage.TYPE_INT_RGB);
+				parent.image = new BufferedImage(x, y, BufferedImage.TYPE_INT_RGB);
 				parent.xCenter = parent.xSize / 2;
 				parent.yCenter = parent.ySize / 2;
 			}

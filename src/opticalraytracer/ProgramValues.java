@@ -67,6 +67,9 @@ final public class ProgramValues extends ValueManager {
     int helpScrollPos = 0;
     int tableLineLimit = 500;
 
-		/* TEST STUFF */
-		double testTextField = 1;
+	/* TEST STUFF */
+	double testTextField = 1;
+	double testX = -30.0;
+	double testY = 0;
+	double testNum = 4;
 }
