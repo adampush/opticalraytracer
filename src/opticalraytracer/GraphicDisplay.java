@@ -525,11 +525,9 @@ final public class GraphicDisplay extends JPanel {
 			// Draw lenses
 			rayTraceComputer.drawLenses(bg);
 			// Trace rays (Lutus Original)
-			rayTraceComputer.traceRays(bg, false);
+//			rayTraceComputer.traceRays(bg, false);
 			
-			// AJP test
-			//long ddd = System.currentTimeMillis();
-			//Common.p("End of rayTraceProcessCore(): " + ddd);
+			// Trace rays (AJP modification)
 			rayTraceComputer.traceRaysAJP(bg, false);
 			
 			// Dispose of the graphics object
@@ -622,6 +620,11 @@ final public class GraphicDisplay extends JPanel {
 		setToolTipText(sb.toString());
 	}
 
+	/**
+	 * Many (most?) of the other HID handling functions are contained in the ControlManager
+	 * class. Why is this one here?
+	 * @param evt
+	 */
 	void handleMouseDrag(MouseEvent evt) {
 		updateStatusBar(evt.getX(), evt.getY(), false);
 		int mx = evt.getX();

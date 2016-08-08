@@ -27,6 +27,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 final public class RayTraceComputer {
 
@@ -417,9 +418,9 @@ final public class RayTraceComputer {
 					drawScaledLine(rli.p, op, g2d, true);
 					
 					// AJP test
-					ComplexInt foo = new ComplexInt();
-					drawScaledLine(new Vector(0,0), foo, g2d, false);
-					drawScaledLine(new Vector(10,10), foo, g2d, true);
+//					ComplexInt foo = new ComplexInt();
+//					drawScaledLine(new Vector(0,0), foo, g2d, false);
+//					drawScaledLine(new Vector(10,10), foo, g2d, true);
 				}
 				// incident light angle vector
 				Vector via = lineb.sub(linea).normalize();
@@ -541,64 +542,70 @@ final public class RayTraceComputer {
 		}
 		// parent.p("traceRays: " + testCount);
 		// testCount += 1;
-		// generate some rays
-
-
-		/* This is where we do some trigonometry, using program parameters from the
-		ProgramValues object, to figure out directions and things related to drawing
-		rays from the emitter */
-		//double xSource = programValues.xBeamSourceRefPlane;
-		double xSource = programValues.testX;
-		double xTarget = programValues.xBeamRotationPlane;
-		double ba = programValues.beamAngle * Common.radians;	// convert degrees to radians
-		double tba = tan(ba) * (xTarget - xSource);				// this represents a vector in the y-direction
-		double min = programValues.yStartBeamPos;
-		double max = programValues.yEndBeamPos;
-		double rmin = min + tba;
-		double rmax = max + tba;
-		//double xs = programValues.xBeamSourceRefPlane;
-		double xs = programValues.testX;
-
-		if (!collectLines) {
-			g2d.setColor(new MyColor(programValues.colorLightSource));
-			ComplexInt i = new ComplexInt();
-			// First move the "draw cursor" to (Xsource,Ymin) but don't draw that line
-			drawScaledLine(xs, rmin, i, g2d, false);
-			// Then draw the vertical "source line"
-			drawScaledLine(xs, rmax, i, g2d, true);
-		}
-
-		double count = max(programValues.beamCount, 1);
-		double topcount = max(programValues.beamCount - 1, 1);
-		for (int ray = 0; ray < count && ray < parent.maxLightRays; ray++) {
-			double y = Common.ntrp(ray, 0, topcount, min, max);			// ntrp probably means interpolate
-			double mya = (programValues.divergingSource) ? 0 : y;
-			double myb = y;
-			mya += tba;
-			Color term = new MyColor(programValues.colorTerminator);
-			Color pbcol = new MyColor(programValues.colorBeam);
-			Color arrowCol = new MyColor(programValues.colorArrow);
-			// an alpha value used by the dispersion calculation
-			double pbalpha = pbcol.getAlpha() / 255.0;
-			if (programValues.dispersionBeams > 0) { // dispersion
-				for (int dbeam = 0; dbeam < programValues.dispersionBeams; dbeam++) {
-					double top = max(programValues.dispersionBeams - 1, 1);
-					// h = hue component of HSV
-					double h = Common.ntrp(dbeam, 0, top, 0, 1);
-					WavelengthColor cw = new WavelengthColor(h);
-					// borrow alpha from normal beam color
-					MyColor colorWavelength = new MyColor(cw.r, cw.g, cw.b,
-							pbalpha);
-					traceOneRay(ray, dbeam, xSource, mya, xTarget, myb, g2d,
-							parent.componentList, term, colorWavelength,
-							arrowCol, cw.wvl, programValues.maxIntersections,
-							collectLines);
+		
+		// TODO: add handling of all existing Emitters at once.
+		HashMap<Long, Emitter> emMap = parent.getMyCustomFrame().getEmitters();
+		for(Emitter em : emMap.values()) {
+			
+			if (em.getDraw()) {
+				double xSource = em.getXPos();
+				double ySource = em.getYPos();
+				double yTarget = ySource + sin(em.getAngle() * Common.radians);
+				double min = yTarget - sin(em.getBeamAngle() * Common.radians);
+				double max = yTarget + sin(em.getBeamAngle() * Common.radians);
+				double xs = em.getXPos();
+				double den = max(em.getNumRays(),2);
+				double d_ang = em.getBeamAngle()/(den-1);
+				double rmin = min;
+				double rmax = max;
+						
+				if (!collectLines) {
+					g2d.setColor(new MyColor(programValues.colorLightSource));
+					ComplexInt i = new ComplexInt();
+					// First move the "draw cursor" to (Xsource,Ymin) but don't draw that line
+					drawScaledLine(xs, rmin, i, g2d, false);
+					// Then draw the vertical "source line"
+					drawScaledLine(xs, rmax, i, g2d, true);
 				}
-			}
-			else { // no dispersion
-				traceOneRay(ray, 0, xSource, mya, xTarget, myb, g2d,
-						parent.componentList, term, pbcol, arrowCol, 0,
-						programValues.maxIntersections, collectLines);
+		
+				double count = max(em.getNumRays(), 1);
+				for (int ray = 0; ray < count && ray < parent.maxLightRays; ray++) {
+					
+					// Source Y coordinate
+					double mya = em.getYPos();
+					
+					// Calculate the target x and y coordinates for the current ray
+					double xTarget = xSource + cos((-em.getBeamAngle()/2 + ray*d_ang + em.getAngle()) * Common.radians);
+					double myb = ySource + sin((-em.getBeamAngle()/2 + ray*d_ang + em.getAngle()) * Common.radians);
+								
+					Color term = new MyColor(programValues.colorTerminator);
+					Color pbcol = new MyColor(programValues.colorBeam);
+					Color arrowCol = new MyColor(programValues.colorArrow);
+					
+					// an alpha value used by the dispersion calculation
+					double pbalpha = pbcol.getAlpha() / 255.0;
+					if (programValues.dispersionBeams > 0) { // dispersion
+						for (int dbeam = 0; dbeam < programValues.dispersionBeams; dbeam++) {
+							double top = max(programValues.dispersionBeams - 1, 1);
+							// h = hue component of HSV
+							double h = Common.ntrp(dbeam, 0, top, 0, 1);
+							WavelengthColor cw = new WavelengthColor(h);
+							// borrow alpha from normal beam color
+							MyColor colorWavelength = new MyColor(cw.r, cw.g, cw.b,
+									pbalpha);
+							traceOneRay(ray, dbeam, xSource, mya, xTarget, myb, g2d,
+									parent.componentList, term, colorWavelength,
+									arrowCol, cw.wvl, programValues.maxIntersections,
+									collectLines);
+						}
+					}
+					else { // no dispersion
+						traceOneRay(ray, 0, xSource, mya, xTarget, myb, g2d,
+								parent.componentList, term, pbcol, arrowCol, 0,
+								programValues.maxIntersections, collectLines);
+					}
+					
+				}
 			}
 		}
 	}

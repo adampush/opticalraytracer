@@ -347,6 +347,8 @@ final public class ControlManager implements ProgramControl {
 
 		}
 	}
+	
+
 
 	private void updateAllControls() {
 		parent.undoPush();

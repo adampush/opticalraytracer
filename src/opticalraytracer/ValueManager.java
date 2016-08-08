@@ -100,6 +100,13 @@ public class ValueManager {
 		return result;
 	}
 
+	// TODO: Perhaps instead of trying to immediately rewrite this to use JSON format for
+	// storing program params, maybe we shoudld just subclass ValueManager like ProgramValues does
+	// but with our own class...
+	
+	// NOTES:
+	// It looks like this does the type checking for us.
+	// 
 	@SuppressWarnings("rawtypes")
 	protected void setOneValue(String tag, String value) {
 		try {

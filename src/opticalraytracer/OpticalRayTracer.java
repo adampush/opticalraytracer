@@ -109,7 +109,7 @@ final public class OpticalRayTracer {
 	int yCenter = -1;
 	OpticalComponent mouseTarget = null;
 	OpticalComponent selectedComponent = null;
-	ArrayList<OpticalComponent> componentList;
+	ArrayList<OpticalComponent> componentList;			// The ArrayList to keep track of OpticalComponents
 	HashSet<String> componentNames;
 	double mousePressX, mousePressY;
 	int popupMouseX = -1;
@@ -199,11 +199,13 @@ final public class OpticalRayTracer {
 	private JLabel lblCenterThickness;
 	private JButton resetProgramButton;
 
-	/* This is my test text field */
-	private JTextField testTextField;
-	private JTextField testXTextField;
-	private JTextField testY;
-	private JTextField testNum;
+	// TODO: fix this
+	/* This is AJP test text field */
+//	private JTextField testTextField;
+//	private JTextField testXTextField;
+//	private JTextField testY;
+//	private JTextField testNum;
+	private MyCustomFrame myCustFrame;
 
 	/**
 	 * Create the application.
@@ -516,10 +518,10 @@ final public class OpticalRayTracer {
 		// new ControlManager(rotateFromXCheckBox, this, "rotXZero"), };
 
 		/* TEST STUFF */
-				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testTextField, this, "testTextField"),
-				new ControlManager(textFieldDoubleSensitivity, -1e10, 1e10,	testXTextField, this, "testX"),
-				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testY, this, "testY"),
-				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testNum, this, "testNum")
+//				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testTextField, this, "testTextField"),
+//				new ControlManager(textFieldDoubleSensitivity, -1e10, 1e10,	testXTextField, this, "testX"),
+//				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testY, this, "testY"),
+//				new ControlManager(textFieldDoubleSensitivity, 0, 1000, testNum, this, "testNum")
 		};
 
 
@@ -698,6 +700,8 @@ final public class OpticalRayTracer {
 
 	void checkXSourcePlane() {
 		//double x = programValues.xBeamSourceRefPlane;
+
+		// TODO: fix this
 		// AJP test
 		double x = programValues.testX;
 		if (abs(x) > programValues.virtualSpaceSize) {
@@ -1167,6 +1171,11 @@ final public class OpticalRayTracer {
 				try {
 					OpticalRayTracer window = new OpticalRayTracer(args);
 					window.frame.setVisible(true);
+					
+					// TODO: fix this
+					// AJP TEST CODE
+					window.myCustFrame.setVisible(true);
+					// END AJP TEST CODE
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -1185,6 +1194,12 @@ final public class OpticalRayTracer {
 		initManager.writeConfig(true);
 		frame.setVisible(false);
 		frame.dispose();
+		
+		// TODO: fix this
+		// AJP TEST CODE
+		myCustFrame.setVisible(false);
+		myCustFrame.dispose();
+		// END AJP TEST CODE
 	}
 
 	/**
@@ -1214,6 +1229,28 @@ final public class OpticalRayTracer {
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
+		
+		// TODO: Fix this
+		// AJP test code
+		myCustFrame = new MyCustomFrame(this);
+		myCustFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				exit();
+			}
+		});
+		
+		/*
+		myCustFrame.setBounds(100, 100, minSize.width, minSize.height);
+		myCustFrame.setMinimumSize(new Dimension(900, 400));
+		myCustFrame.setPreferredSize(new Dimension(900, 600));
+		myCustFrame.setSize(minSize);
+		myCustFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		*/
+		// END AJP TEST CODE
+		
+		
+		
 		designPane = new JPanel();
 
 		designPane.setToolTipText("");
@@ -1802,44 +1839,52 @@ final public class OpticalRayTracer {
 		/* TEST STUFF */
 		/* For proper alignment the label should be in even column and the text box should
 		 * be in odd column. */
-		JLabel lblTestTextField = new JLabel("Test Text Field");
-		programControlPane.add(lblTestTextField, "cell 6 0,alignx trailing");
-
-		testTextField = new JTextField();
-		testTextField.setToolTipText("The testTextField box is for testing");
-		testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-		testTextField.setColumns(10);
-		programControlPane.add(testTextField, "cell 7 0");
-
-
-		JLabel lblTestXTextField = new JLabel("Test X");
-		programControlPane.add(lblTestXTextField, "cell 6 1,alignx trailing");
-
-		testXTextField = new JTextField();
-		testXTextField.setToolTipText("The testTextField box is for testing");
-		testXTextField.setHorizontalAlignment(SwingConstants.RIGHT);
-		programControlPane.add(testXTextField, "cell 7 1");
-		testXTextField.setColumns(10);
-
-
-		JLabel lblTestY = new JLabel("Test Y");
-		programControlPane.add(lblTestY, "cell 6 2, alignx trailing");
-
-		testY = new JTextField();
-		testY.setToolTipText("The testTextField box is for testing");
-		testY.setHorizontalAlignment(SwingConstants.RIGHT);
-		testY.setColumns(10);
-		programControlPane.add(testY, "cell 7 2");
-
-
-		JLabel lblTestNum = new JLabel("Test Num");
-		programControlPane.add(lblTestNum, "cell 6 3, alignx trailing");
-
-		testNum = new JTextField();
-		testNum.setToolTipText("The testTextField box is for testing");
-		testNum.setHorizontalAlignment(SwingConstants.RIGHT);
-		testNum.setColumns(10);
-		programControlPane.add(testNum, "cell 7 3");
+//		JLabel lblTestTextField = new JLabel("Test Text Field");
+//		programControlPane.add(lblTestTextField, "cell 6 0,alignx trailing");
+//
+//		testTextField = new JTextField();
+//		testTextField.setToolTipText("The testTextField box is for testing");
+//		testTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+//		testTextField.setColumns(10);
+//		programControlPane.add(testTextField, "cell 7 0");
+//
+//
+//		JLabel lblTestXTextField = new JLabel("Test X");
+//		programControlPane.add(lblTestXTextField, "cell 6 1,alignx trailing");
+//
+//		testXTextField = new JTextField();
+//		testXTextField.setToolTipText("The testTextField box is for testing");
+//		testXTextField.setHorizontalAlignment(SwingConstants.RIGHT);
+//		programControlPane.add(testXTextField, "cell 7 1");
+//		testXTextField.setColumns(10);
+//
+//
+//		JLabel lblTestY = new JLabel("Test Y");
+//		programControlPane.add(lblTestY, "cell 6 2, alignx trailing");
+//
+//		testY = new JTextField();
+//		testY.setToolTipText("The testTextField box is for testing");
+//		testY.setHorizontalAlignment(SwingConstants.RIGHT);
+//		testY.setColumns(10);
+//		programControlPane.add(testY, "cell 7 2");
+//
+//
+//		JLabel lblTestNum = new JLabel("Test Num");
+//		programControlPane.add(lblTestNum, "cell 6 3, alignx trailing");
+//
+//		testNum = new JTextField();
+//		testNum.setToolTipText("The testTextField box is for testing");
+//		testNum.setHorizontalAlignment(SwingConstants.RIGHT);
+//		testNum.setColumns(10);
+//		programControlPane.add(testNum, "cell 7 3");
 		/* END TEST STUFF */
+	}
+	
+	/**
+	 * Returns AJP's MyCustomFrame object associated with this OpticalRayTracer.
+	 * @return MyCustomFrame
+	 */
+	public MyCustomFrame getMyCustomFrame() {
+		return this.myCustFrame;
 	}
 }
